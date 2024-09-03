@@ -51,3 +51,36 @@ public:
         return "Versamento";
     }
 };
+
+//Classe per rappresentare un conto corrente di una persona random (Me stesso in questo caso)
+class ContoCorrente {
+public:
+    ContoCorrente(const std::string& nome, const std::string& cognome, const std::string& indirizzo, const std::string& numero_telefonico, float conto_corrente)
+    : nome(nome), cognome(cognome), indirizzo(indirizzo), numero_telefonico(numero_telefonico), conto_corrente(conto_corrente) {}
+
+    ~ContoCorrente() {
+        for(auto& transaction : transactions) {
+            delete transaction;
+        }
+    }
+
+    void MostraAccount() const {
+        std::cout << "Nome e Cognome: " << nome << " " << cognome << std::endl;
+        std::cout << "Indirizzo: " << indirizzo << std::endl;
+        std::cout << "Numero di Telefono : " << numero_telefonico << std::endl;
+        std::cout << "Saldo attuale: " << conto_corrente << " €" << std::endl;
+    }
+
+    float getConto_corrente() const {
+        return conto_corrente;
+    }
+
+private:
+    std::string nome;
+    std::string cognome;
+    std::string indirizzo;
+    std::string numero_telefonico;
+    float conto_corrente;
+    std::vector<Transazione*> transactions;
+
+};
