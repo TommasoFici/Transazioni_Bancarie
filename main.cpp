@@ -64,11 +64,28 @@ public:
         }
     }
 
+    void addBonifico(const std::string& data, float importo, const std::string& descrizione) {
+        transactions.push_back(new Bonifico(data, importo,descrizione));
+        conto_corrente += importo;
+    }
+
+    void addVersamento(const std::string& data, float importo, std::string& descrizione) {
+        transactions.push_back(new Versamento(data, importo, descrizione));
+        conto_corrente -= importo;
+    }
+
     void MostraAccount() const {
         std::cout << "Nome e Cognome: " << nome << " " << cognome << std::endl;
         std::cout << "Indirizzo: " << indirizzo << std::endl;
         std::cout << "Numero di Telefono : " << numero_telefonico << std::endl;
         std::cout << "Saldo attuale: " << conto_corrente << " €" << std::endl;
+    }
+
+    void MostraTransazioni() const {
+        std::cout << "\nTransazioni: " << std::endl;
+        for (const auto& transaction : transactions) {
+            transaction->display();
+        }
     }
 
     float getConto_corrente() const {
