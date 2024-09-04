@@ -5,11 +5,10 @@
 
 using namespace std;
 
-//Classe base per una transazione
+// Classe base per una transazione
 class Transazione {
 public:
-    Transazione(const std::string& data, float importo, const std::string& descrizione)
-    : data(data), importo(importo), descrizione(descrizione) {}
+    Transazione(const std::string& data, float importo, const std::string& descrizione) : data(data), importo(importo), descrizione(descrizione) {}
 
     virtual ~Transazione() = default;
 
@@ -36,18 +35,17 @@ protected:
 
 };
 
-//Classe derivata per rappresentare un entrata
+// Classe derivata per rappresentare un entrata
 class Bonifico : public Transazione {
 public:
-    Bonifico(const std::string& data, float importo, const std::string& descrizione)
-    : Transazione(data, importo, descrizione) {}
+    Bonifico(const std::string& data, float importo, const std::string& descrizione) : Transazione(data, importo, descrizione) {}
 
     std::string getType() const override {
         return "Bonifico";
     }
 };
 
-//Classe derivata per rappresentare un'uscita
+// Classe derivata per rappresentare un'uscita
 class Versamento : public Transazione {
 public:
     Versamento(const std::string& data, float importo, const std::string& descrizione)
@@ -57,6 +55,40 @@ public:
         return "Versamento";
     }
 };
+
+// Funzione per caricare una transazione da una riga del file
+Transazione* Transazione::CaricaDalFile(const std::string &line) {
+    std::string tipo, data, descrizione;
+    float importo;
+    char delimiter = ',';
+    size_t pos = 0, prevPos = 0;
+
+    // Estraggo il tipo
+    pos = line.find(delimiter, prevPos);
+    tipo = line.substr(prevPos, pos-prevPos);
+    prevPos = pos + 1;
+
+    // Estraggo la data
+    pos = line.find(delimiter, prevPos);
+    data = line.substr(prevPos, pos - prevPos);
+    prevPos = pos + 1;
+
+    // Estraggo l'importo
+    pos = line.find(delimiter, prevPos);
+    importo = std::stof(line.substr(prevPos, pos - prevPos));
+    prevPos = pos + 1;
+
+    // Estraggo la descrizione
+    descrizione = line.substr(prevPos);
+
+    if (tipo == "Bonifico") {
+        return new Bonifico (data, importo, descrizione);
+    } else if (tipo == "Versamento") {
+        return new Versamento (data, importo, descrizione);
+    } else{
+        return nullptr;
+    }
+}
 
 // Funzione per salvare tutte le transazioni su file
 void SalvaTransazioniFile(const std::vector<Transazione*>& transactions, const std::string& nomefile) {
@@ -91,7 +123,7 @@ std::vector<Transazione*> CaricaDalFile(const std::string& nomefile) {
     return transactions;
 }
 
-//Classe per rappresentare un conto corrente di una persona random (Me stesso in questo caso)
+// Classe per rappresentare un conto corrente di una persona random (Me stesso in questo caso)
 class ContoCorrente {
 public:
     ContoCorrente(const std::string& nome, const std::string& cognome, const std::string& indirizzo, const std::string& numero_telefonico, float conto_corrente)
