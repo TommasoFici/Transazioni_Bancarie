@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-
+#include <fstream>
 
 using namespace std;
 
@@ -14,6 +14,12 @@ public:
     virtual ~Transazione() = default;
 
     virtual std::string getType() const = 0;
+
+    virtual void SalvaNelFile(std::ofstream& outFile) const {
+        outFile << getType() << ", " << data << ", " << importo << " €, " << descrizione << "\n";
+    }
+
+    static Transazione* CaricaDalFile(const std::string& line);
 
     virtual void display() const {
         cout << "Data: " << data << " | Importo: " << importo << " € | Descrizione: " << descrizione << std::endl;
@@ -51,6 +57,39 @@ public:
         return "Versamento";
     }
 };
+
+// Funzione per salvare tutte le transazioni su file
+void SalvaTransazioniFile(const std::vector<Transazione*>& transactions, const std::string& nomefile) {
+    std::ofstream outFile(nomefile);
+    if (outFile.is_open()) {
+        for(const auto& transaction : transactions) {
+            transaction->SalvaNelFile(outFile);
+        }
+        outFile.close();
+    } else {
+        std::cerr << "Impossibile aprire il file per la scrittura" << std::endl;
+    }
+}
+
+// Funzione per caricare tutte le transazioni da un file
+std::vector<Transazione*> CaricaDalFile(const std::string& nomefile) {
+    std::vector<Transazione*> transactions;
+    std::ifstream inFile(nomefile);
+    std::string line;
+
+    if (inFile.is_open()) {
+        while(std::getline(inFile, line)) {
+            Transazione* transaction = Transazione::CaricaDalFile(line);
+            if (transaction) {
+                transactions.push_back(transaction);
+            }
+        }
+        inFile.close();
+    } else{
+        std::cerr << "Impossibile aprire il file per la lettura" << std::endl;
+    }
+    return transactions;
+}
 
 //Classe per rappresentare un conto corrente di una persona random (Me stesso in questo caso)
 class ContoCorrente {
