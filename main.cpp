@@ -48,8 +48,7 @@ public:
 // Classe derivata per rappresentare un'uscita
 class Versamento : public Transazione {
 public:
-    Versamento(const std::string& data, float importo, const std::string& descrizione)
-    : Transazione(data, importo, descrizione) {}
+    Versamento(const std::string& data, float importo, const std::string& descrizione) : Transazione(data, importo, descrizione) {}
 
     std::string getType() const override {
         return "Versamento";
@@ -156,6 +155,75 @@ public:
         std::cout << "\nTransazioni: " << std::endl;
         for (const auto& transaction : transactions) {
             transaction->display();
+        }
+    }
+
+    void SalvaAccountNelFile(const std::string& nomefile) const {
+        std::ofstream outFile(nomefile);
+        if(outFile.is_open()) {
+            // Salvo le informazioni personali e il saldo
+            outFile << "Proprietario: " << nome << " " << cognome << "\nIndirizzo: " << indirizzo << "\nNumero di Telefono: " << numero_telefonico << "\nSaldo Attuale: " << conto_corrente << "Euro\n\nUltimi movimenti effettuati: \n";
+            // Salvo le transazioni
+            for(const auto& transaction : transactions) {
+                transaction->SalvaNelFile(outFile);
+            }
+            outFile.close();
+        } else {
+            std::cerr << "Impossibile aprire il file per la scrittura." << std::endl;
+        }
+    }
+
+    void CaricaAccountDalFile(const std::string& nomefile) {
+        std::ifstream inFile(nomefile);
+        std::string line;
+
+        if(inFile.is_open()) {
+
+            // Carico le informazioni personali e il saldo
+            std::getline(inFile, line);
+            size_t pos = 0, prevPos = 0;
+            char delimiter = ',';
+
+            // Estraggo il nome
+            pos = line.find(delimiter, prevPos);
+            nome = line.substr(prevPos, pos - prevPos);
+            prevPos = pos + 1;
+
+            // Estraggo il cognome
+            pos = line.find(delimiter, prevPos);
+            cognome = line.substr(prevPos, pos - prevPos);
+            prevPos = pos + 1;
+
+            // Estraggo l'indirizzo
+            pos = line.find(delimiter, prevPos);
+            indirizzo = line.substr(prevPos, pos - prevPos);
+            prevPos = pos + 1;
+
+            // Estraggo il numero di telefono
+            pos = line.find(delimiter, prevPos);
+            numero_telefonico = line.substr(prevPos, pos - prevPos);
+            prevPos = pos + 1;
+
+            // Estraggo il saldo
+            conto_corrente = std::stof(line.substr(prevPos));
+
+            // Carico le transazioni
+            while (std::getline(inFile, line)) {
+                Transazione* transaction = Transazione::CaricaDalFile(line);
+                if (transaction) {
+                    transactions.push_back(transaction);
+
+                    // Aggiorno il saldo in base al tipo di transazione
+                    if (transaction->getType() == "Bonifico") {
+                        conto_corrente += transaction->getImporto();
+                    } else if (transaction->getType() == "Versamento") {
+                        conto_corrente -= transaction->getImporto();
+                    }
+                }
+            }
+            inFile.close();
+        } else {
+            std::cerr << "Impossibile aprire il file per la lettura." << std::endl;
         }
     }
 
