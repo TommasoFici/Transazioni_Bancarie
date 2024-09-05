@@ -139,7 +139,7 @@ public:
         conto_corrente += importo;
     }
 
-    void addVersamento(const std::string& data, float importo, std::string& descrizione) {
+    void addVersamento(const std::string& data, float importo, const std::string& descrizione) {
         transactions.push_back(new Versamento(data, importo, descrizione));
         conto_corrente -= importo;
     }
@@ -238,5 +238,32 @@ private:
     std::string numero_telefonico;
     float conto_corrente;
     std::vector<Transazione*> transactions;
-
 };
+
+int main() {
+     // Crea un conto corrente con informazioni iniziali
+     ContoCorrente account("Tommaso", "Fici", "Via Ciro Menotti 7; Firenze", "3476601816", 500.0);
+
+     // Aggiungo alcune transazioni
+     account.addBonifico("15-03-2024", 500.0, "Lavoro part-time");
+     account.addVersamento("07-08-2024", 180.5, "Cena Ristorante Armanda");
+     account.addVersamento("22-08-2024", 50.5, "Aquisto Amazon");
+
+     // Mostra le informazioni del conto e le transazioni
+     account.MostraAccount();
+     account.MostraTransazioni();
+
+     //Salvo il conto e le transazioni su file
+     account.SalvaAccountNelFile("conto_corrente.txt");
+
+     // Creo un nuovo conto per caricare i dati dal file
+     ContoCorrente loadedAccount("", "", "", "",0.0);
+     loadedAccount.CaricaAccountDalFile("conto_corrente.txt");
+
+     // Mostro le informazioni del conto caricato e le transazioni
+     std::cout << "\nDati caricati dal file:\n";
+     loadedAccount.MostraAccount();
+     loadedAccount.MostraTransazioni();
+
+    return 0;
+}
