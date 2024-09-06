@@ -162,7 +162,7 @@ public:
         std::ofstream outFile(nomefile);
         if(outFile.is_open()) {
             // Salvo le informazioni personali e il saldo
-            outFile << "Proprietario: " << nome << " " << cognome << "\nIndirizzo: " << indirizzo << "\nNumero di Telefono: " << numero_telefonico << "\nSaldo Attuale: " << conto_corrente << "Euro\n\nUltimi movimenti effettuati: \n";
+            outFile << "Proprietario: " << nome << " " << cognome << "\nIndirizzo: " << indirizzo << "\nNumero di Telefono: " << numero_telefonico << "\nSaldo Attuale: " << conto_corrente << " €\n\nUltimi movimenti effettuati: \n";
             // Salvo le transazioni
             for(const auto& transaction : transactions) {
                 transaction->SalvaNelFile(outFile);
