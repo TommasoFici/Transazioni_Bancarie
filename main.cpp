@@ -180,32 +180,29 @@ public:
         if(inFile.is_open()) {
 
             // Carico le informazioni personali e il saldo
-            std::getline(inFile, line);
-            size_t pos = 0, prevPos = 0;
-            char delimiter = ',';
-
             // Estraggo il nome
-            pos = line.find(delimiter, prevPos);
-            nome = line.substr(prevPos, pos - prevPos);
-            prevPos = pos + 1;
+            std::getline(inFile, line);
+            nome = line.substr(line.find(':') + 2);
 
             // Estraggo il cognome
-            pos = line.find(delimiter, prevPos);
-            cognome = line.substr(prevPos, pos - prevPos);
-            prevPos = pos + 1;
+            std::getline(inFile, line);
+            cognome = line.substr(line.find(':') + 2);
 
             // Estraggo l'indirizzo
-            pos = line.find(delimiter, prevPos);
-            indirizzo = line.substr(prevPos, pos - prevPos);
-            prevPos = pos + 1;
+            std::getline(inFile, line);
+            indirizzo = line.substr(line.find(':') + 2);
 
             // Estraggo il numero di telefono
-            pos = line.find(delimiter, prevPos);
-            numero_telefonico = line.substr(prevPos, pos - prevPos);
-            prevPos = pos + 1;
+            std::getline(inFile, line);
+            numero_telefonico = line.substr(line.find(':') + 2);
 
             // Estraggo il saldo
-            conto_corrente = std::stof(line.substr(prevPos));
+            std::getline(inFile, line);
+            conto_corrente = std::stof(line.substr(line.find(':') + 2));
+
+            //Salto la riga vuota e il titolo successivo per le transazioni
+            std::getline(inFile, line);
+            std::getline(inFile, line);
 
             // Carico le transazioni
             while (std::getline(inFile, line)) {
@@ -246,14 +243,14 @@ int main() {
 
      // Aggiungo alcune transazioni
      account.addBonifico("15-03-2024", 500.0, "Lavoro part-time");
-     account.addVersamento("07-08-2024", 180.5, "Cena Ristorante Armanda");
-     account.addVersamento("22-08-2024", 50.5, "Aquisto Amazon");
+     account.addVersamento("07-08-2024", 181.55, "Cena Ristorante Armanda");
+     account.addVersamento("22-08-2024", 50.59, "Acquisto Amazon");
 
      // Mostra le informazioni del conto e le transazioni
      account.MostraAccount();
      account.MostraTransazioni();
 
-     //Salvo il conto e le transazioni su file
+    // Salvo il conto e le transazioni su file
      account.SalvaAccountNelFile("conto_corrente.txt");
 
      // Creo un nuovo conto per caricare i dati dal file
