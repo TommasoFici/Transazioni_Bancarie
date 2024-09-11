@@ -178,46 +178,92 @@ public:
         std::string line;
 
         if(inFile.is_open()) {
+            try {
+                // Carico le informazioni personali e il saldo
+                std::getline(inFile, line);
+                if (line.find(": ") != std::string::npos) {
+                    nome = line.substr(line.find(": ") + 2);
+                } else {
+                    std::cerr << "Errore nel formato del file: nome" << std::endl;
+                    return;
+                }
 
-            // Carico le informazioni personali e il saldo
-            // Estraggo il nome
-            std::getline(inFile, line);
-            nome = line.substr(line.find(':') + 2);
+                std::getline(inFile, line);
+                if (line.find(": ") != std::string::npos) {
+                    cognome = line.substr(line.find(": ") + 2);
+                } else {
+                    std::cerr << "Errore nel formato del file: cognome" << std::endl;
+                    return;
+                }
 
-            // Estraggo il cognome
-            std::getline(inFile, line);
-            cognome = line.substr(line.find(':') + 2);
+                std::getline(inFile, line);
+                if (line.find(": ") != std::string::npos) {
+                    indirizzo = line.substr(line.find(": ") + 2);
+                } else {
+                    std::cerr << "Errore nel formato del file: indirizzo" << std::endl;
+                    return;
+                }
 
-            // Estraggo l'indirizzo
-            std::getline(inFile, line);
-            indirizzo = line.substr(line.find(':') + 2);
+                std::getline(inFile, line);
+                if (line.find(": ") != std::string::npos) {
+                    numero_telefonico = line.substr(line.find(": ") + 2);
+                } else {
+                    std::cerr << "Errore nel formato del file: numero di telefono" << std::endl;
+                    return;
+                }
+                // Cerca la riga che contiene il saldo
+                while (std::getline(inFile, line)) {
+                    if (line.find("Saldo Attuale:") != std::string::npos) {
+                        // Trova la posizione di "Saldo Attuale:" e inizia la lettura dopo i due punti
+                        size_t pos = line.find(": ") + 1;
+                        std::string saldoStr = line.substr(pos);
 
-            // Estraggo il numero di telefono
-            std::getline(inFile, line);
-            numero_telefonico = line.substr(line.find(':') + 2);
+                        // Rimuove eventuali spazi bianchi all'inizio e alla fine
+                        saldoStr.erase(0, saldoStr.find_first_not_of(" \t"));
+                        saldoStr.erase(saldoStr.find_last_not_of(" \t") + 1);
 
-            // Estraggo il saldo
-            std::getline(inFile, line);
-            conto_corrente = std::stof(line.substr(line.find(':') + 2));
+                        // Rimuove il simbolo "€" se presente
+                        size_t euroPos = saldoStr.find("€");
+                        if (euroPos != std::string::npos) {
+                            saldoStr = saldoStr.substr(0, euroPos);
+                        }
 
-            //Salto la riga vuota e il titolo successivo per le transazioni
-            std::getline(inFile, line);
-            std::getline(inFile, line);
-
-            // Carico le transazioni
-            while (std::getline(inFile, line)) {
-                Transazione* transaction = Transazione::CaricaDalFile(line);
-                if (transaction) {
-                    transactions.push_back(transaction);
-
-                    // Aggiorno il saldo in base al tipo di transazione
-                    if (transaction->getType() == "Bonifico") {
-                        conto_corrente += transaction->getImporto();
-                    } else if (transaction->getType() == "Versamento") {
-                        conto_corrente -= transaction->getImporto();
+                        // Prova a convertire la stringa in float
+                        try {
+                            conto_corrente = std::stof(saldoStr);
+                        } catch (const std::exception& e) {
+                            std::cerr << "Errore nella conversione del saldo: " << e.what() << std::endl;
+                            return;
+                        }
+                        break; // Uscita dal ciclo una volta trovato il saldo
                     }
                 }
+                // Salto la riga vuota e il titolo "Ultimi movimenti effettuati:"
+                std::getline(inFile, line);
+                std::getline(inFile, line);
+
+                // Carico le transazioni
+                while (std::getline(inFile, line)) {
+                    Transazione* transaction = Transazione::CaricaDalFile(line);
+                    if (transaction) {
+                        transactions.push_back(transaction);
+
+                        // Aggiorno il saldo in base al tipo di transazione
+                        if (transaction->getType() == "Bonifico") {
+                            conto_corrente += transaction->getImporto();
+                        } else if (transaction->getType() == "Versamento") {
+                            conto_corrente -= transaction->getImporto();
+                        }
+                    } else {
+                        std::cerr << "Errore nel caricamento della transazione: " << line << std::endl;
+                    }
+                }
+            } catch (const std::out_of_range& e) {
+                std::cerr << "Eccezione std::out_of_range: " << e.what() << std::endl;
+            } catch (const std::exception& e) {
+                std::cerr << "Eccezione generica: " << e.what() << std::endl;
             }
+
             inFile.close();
         } else {
             std::cerr << "Impossibile aprire il file per la lettura." << std::endl;
@@ -258,9 +304,9 @@ int main() {
      loadedAccount.CaricaAccountDalFile("conto_corrente.txt");
 
      // Mostro le informazioni del conto caricato e le transazioni
-     std::cout << "\nDati caricati dal file:\n";
-     loadedAccount.MostraAccount();
-     loadedAccount.MostraTransazioni();
+     //std::cout << "\nDati caricati dal file:\n";
+     //loadedAccount.MostraAccount();
+     //loadedAccount.MostraTransazioni();
 
     return 0;
 }
